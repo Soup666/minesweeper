@@ -1,20 +1,30 @@
 # Imports
 import random
 
+# Constants
 SIZE = 5
 BOARD = [["0" for row in range(SIZE)] for col in range(SIZE)]
 DISPLAYED_BOARD = [["_" for row in range(SIZE)] for col in range(SIZE)]
 
-def get_coords(index):
+# Functions
+def get_position(index):
+	'''
+	Take in a number index and return the corresponding row and column
+	'''
 	row = index // SIZE
 	col = index % SIZE
 	return row, col
 
+
 def populate_board():
+	'''
+	Populate the board with a certain number of bombs, depending on the size
+	No. bombs = Size + 1
+	'''
 	for i in range(SIZE + 1):
 		while True:
-			position = random.randint(0, SIZE**2 - 1)
-			row, col = get_coords(position)
+			index = random.randint(0, SIZE**2 - 1)
+			row, col = get_position(index)
 			if BOARD[row][col] != "*":
 				BOARD[row][col] = "*"
 				increment_adjacents(row-1, col)
@@ -29,7 +39,12 @@ def populate_board():
 			else:
 				continue
 
+				
 def increment_adjacents(row, col):
+	'''
+	Increment the specified tile if it is valid
+	A valid tile isn't out of bounds and isn't a bomb
+	'''
 	if (row != SIZE) and (col != SIZE) and (row != -1) and (col != -1):
 		if BOARD[row][col] != '*':
 			original = int(BOARD[row][col])
@@ -37,6 +52,11 @@ def increment_adjacents(row, col):
 			BOARD[row][col] = str(new)
 
 def check_adjacents(row, col):
+	'''
+	Check all unexplored adjacent tiles to see if they have a 0 value
+	If so, explore this tile and recusively check its adjacent tiles
+	This builds up a stack of check_adjancents() calls
+	'''
 	if row > 0:
 		if BOARD[row-1][col] == '0' and DISPLAYED_BOARD[row-1][col] == "_":
 			DISPLAYED_BOARD[row-1][col] = '0'
@@ -55,9 +75,15 @@ def check_adjacents(row, col):
 			check_adjacents(row, col-1)
 
 def move(row, col):
+	'''
+	Take the player's move
+	End the game if the player selects a bomb
+	Explore the tile if it is not a bomb, calling check_adjacents() if it is a 0
+	'''
 	if BOARD[row][col] == '*':
 		print("Game over! Here is the full board!")
 		display_board(BOARD)
+		input()
 		exit()
 	if BOARD[row][col] == '0':
 		DISPLAYED_BOARD[row][col] = '0'
@@ -66,6 +92,10 @@ def move(row, col):
 		DISPLAYED_BOARD[row][col] = BOARD[row][col]
 
 def display_board(board):
+	'''
+	Display the board's arrays in a more user friendly layout
+	Add an axis and use | to separate tiles
+	'''
 	print(".", end =" | ")
 	for i in range(SIZE):
 		print(i, end =" | ")
@@ -79,16 +109,9 @@ def display_board(board):
 		count = count + 1
 
 
+# Main
 if __name__ == '__main__':
 	populate_board()
-	print(" __   __  ___   __    _  _______    _______  _     _  _______  _______  _______  _______  ______   ")
-	print("|  |_|  ||   | |  |  | ||       |  |       || | _ | ||       ||       ||       ||       ||    _ |  ")
-	print("|       ||   | |   |_| ||    ___|  |  _____|| || || ||    ___||    ___||    _  ||    ___||   | ||  ")
-	print("|       ||   | |       ||   |___   | |_____ |       ||   |___ |   |___ |   |_| ||   |___ |   |_||_ ")
-	print("|       ||   | |  _    ||    ___|  |_____  ||       ||    ___||    ___||    ___||    ___||    __  |")
-	print("| ||_|| ||   | | | |   ||   |___    _____| ||   _   ||   |___ |   |___ |   |    |   |___ |   |  | |")
-	print("|_|   |_||___| |_|  |__||_______|  |_______||__| |__||_______||_______||___|    |_______||___|  |_|")
-	print("___________________________________________________________________________________________________")
 	print("\nWelcome to Minesweeper. Enter q at any time to quit.\n")
 	while True:
 		print("Current board:")
